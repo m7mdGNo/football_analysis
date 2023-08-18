@@ -4,15 +4,15 @@ This project is an application that captures live video from a moving camera for
 
 ## Table of Contents
 - [Introduction](#introduction)
-- [Features](#Features)
-- [Files Structure](#Files Structure)
-- [How it works](#how-it-works)
-- [Examles](#examples)
+- [Features](#features)
+- [File Structure](#file-structure)
+- [How It Works](#how-it-works)
+- [Examples](#examples)
 - [Getting Started](#getting-started)
   - [Installation](#installation)
   - [Usage](#usage)
-  - [Custom Usage](#Custom Usage)
-- [Feuture Work](#Feuture Work)
+  - [Custom Usage](#custom-usage)
+- [Future Work](#future-work)
 - [Contributing](#contributing)
 - [License](#license)
 
