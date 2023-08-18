@@ -12,7 +12,7 @@ This project is an application that captures live video from a moving camera for
   - [Installation](#installation)
   - [Usage](#usage)
   - [Custom Usage](#Custom Usage)
-
+- [Feuture Work](#Feuture Work)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -155,6 +155,18 @@ as you can see here there are 30 points, then the detection model is trying to d
     ```
     
 - note: the model is trained on custom dataset, so it may not work well, also it's under developing.
+
+## Feuture Work
+- [ ] Train the model on more data.
+- [ ] Add players detection.
+        - cluster teams.
+        - track players.
+        - estimate speed.
+        - estimate distance.
+- [ ] Estimate ball position.
+- [ ] Add smoothness for video.
+- [ ] Add GUI.
+
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
