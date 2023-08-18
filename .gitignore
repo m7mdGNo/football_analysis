@@ -1,4 +1,4 @@
-/clibs
-/models
-/output
+/clibs/*
+/models/*
+/output/*
 *.ipynb
