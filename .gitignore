@@ -1,6 +1,3 @@
 /clibs/*.mp4
-/models/*.pt
 /output/*.mp4
-/output/*.png
-/output/*.jpg
 *.ipynb
