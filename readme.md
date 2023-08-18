@@ -4,7 +4,7 @@ This project is an application that captures live video from a moving camera for
 
 ## Table of Contents
 - [Introduction](#introduction)
-- [Features](#features)
+- [Features](#Features)
 - [Files Structure](#Files Structure)
 - [How it works](#how-it-works)
 - [Examles](#examples)
