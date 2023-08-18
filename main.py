@@ -7,8 +7,8 @@ import time
 
 # construct the argument parser and parse the arguments
 parser = argparse.ArgumentParser(description='top-down view for football field')
-parser.add_argument('--source', type=str, help='path to source')
-parser.add_argument('--output', type=str, help='path to output video')
+parser.add_argument('--source', type=str, help='path to source "img or video"')
+parser.add_argument('--output', type=str, help='path to output')
 
 
 def main():
@@ -16,7 +16,7 @@ def main():
     image_format = False
     video_format = False
     # List of common image formats
-    image_formats = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff']
+    image_formats = ['jpg', 'jpeg', 'png']
     # List of common video formats
     video_formats = ['mp4', 'avi', 'mov', 'mkv', 'flv', 'wmv', 'webm']
 
@@ -95,7 +95,7 @@ def main():
 
                 frame = basemodel.draw_corners(frame,corners)
                 try:
-                    top_view, _ = basemodel.get_top_view(frame, corners)
+                    top_view, _ = basemodel.get_top_view(frame, corners,thresh=150)
                     mrg_view,_ = basemodel.get_merge_view(frame,corners)
                 except:
                     top_view = basemodel.est
@@ -108,6 +108,9 @@ def main():
                 comp = np.concatenate([frame,top_view,mrg_view],axis=1)
                 out.write(comp)
 
+                cv2.imshow('frame', comp)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
             else:
                 break
 
