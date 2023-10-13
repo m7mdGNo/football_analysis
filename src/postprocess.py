@@ -1,4 +1,4 @@
-from .utils.utils import cluster_main_horizontal_lines, calculate_slope
+from .utils.utils import cluster_main_horizontal_lines, calculate_slope, find_intersection_point
 
 
 def invert_corners(label, corners_labels, index):
@@ -40,10 +40,51 @@ def invert_corners(label, corners_labels, index):
     return corners_labels
 
 
+
+def find_point_34(corners):
+        try:
+            line1 = (corners['7'],corners['8'])
+            line2 = (corners['2'],corners['9'])
+            goal_point = find_intersection_point(line1,line2)
+            return goal_point
+        except:
+            return None
+    
+def find_point_35(corners):
+    try:
+        line1 = (corners['7'],corners['8'])
+        line2 = (corners['5'],corners['12'])
+        goal_point = find_intersection_point(line1,line2)
+        return goal_point
+    except:
+        return None
+
+    
+def find_point_32(corners):
+    try:
+        line1 = (corners['8'],corners['10'])
+        line2 = (corners['7'],corners['11'])
+        goal_point = find_intersection_point(line1,line2)
+        return goal_point
+    except:
+        return None
+        
 def corners_postprocess(corners: dict):
     """
     Postprocess the corners to get the correct order of them
     """
+
+    # point_32 = find_point_32(corners)
+    point_34 = find_point_34(corners)
+    point_35 = find_point_35(corners)
+
+    # if point_32:
+    #     corners.update({'32':point_32})
+    if point_34:
+        corners.update({'34':point_34})
+    if point_35:
+        corners.update({'35':point_35})
+
     corners_cords = list(corners.values())
     corners_labels = list(corners.keys())
     postprocessed_corners = {}

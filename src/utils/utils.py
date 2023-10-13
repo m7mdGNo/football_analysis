@@ -1,3 +1,5 @@
+import math
+
 def cluster_horizontal_lines(corners: dict):
     group_a = []
     group_b = []
@@ -63,3 +65,28 @@ def get_player_point(player):
     """
     x1, y1, x2, y2 = player
     return ((x1 + x2) // 2, y2)
+
+
+def calculate_distance(x1, y1, x2, y2):
+    distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+    return distance
+
+    
+def find_intersection_point(line1, line2):
+    (x1, y1), (x2, y2) = line1
+    (x3, y3), (x4, y4) = line2
+    slope1 = (y2 - y1) / (x2 - x1) if x2 != x1 else float('inf')
+    slope2 = (y4 - y3) / (x4 - x3) if x4 != x3 else float('inf')
+    if slope1 == slope2:
+        return []
+    if slope1 == float('inf'):
+        x_intersect = x1
+        y_intersect = slope2 * (x_intersect - x3) + y3
+    elif slope2 == float('inf'):
+        x_intersect = x3
+        y_intersect = slope1 * (x_intersect - x1) + y1
+    else:
+        x_intersect = (slope1 * x1 - y1 - slope2 * x3 + y3) / (slope1 - slope2)
+        y_intersect = slope1 * (x_intersect - x1) + y1
+    
+    return x_intersect, y_intersect

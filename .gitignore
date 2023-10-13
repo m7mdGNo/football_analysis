@@ -1,3 +1,14 @@
 /clibs/*.mp4
 /output/*.mp4
+/models/*.pt
+/models/*.pth
+/models/*.onnx
+/models/*.engine
 *.ipynb
+*.pth
+*.pt
+/football-players-detection-1
+/roboflow
+/roboflow_custom
+/ball_dataset
+threaded.py

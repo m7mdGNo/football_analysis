@@ -23,7 +23,8 @@ def draw_player_rect(frame, player, color):
     return frame
 
 
-def draw_player_point(frame, player, color):
+def draw_player_point(frame, player, color,size=12):
     x, y = player
-    cv2.circle(frame, (int(x), int(y)), 12, color, -1)
+    cv2.circle(frame, (int(x), int(y)), size, color, -1)
+    # cv2.circle(frame, (int(x), int(y)), size, (255,255,255), 2)
     return frame

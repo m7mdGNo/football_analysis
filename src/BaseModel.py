@@ -1,15 +1,17 @@
 import random
 import cv2
 import numpy as np
-from sklearn.cluster import KMeans
-from .detection_package import detect_corners, detect_persons
+from sklearn.cluster import KMeans,DBSCAN,MeanShift
+from .detection_package import detect_corners, detect_game_objects, detect_all_game_objects,detect_ball
 from .homography_package import calculate_homography, get_transformed_point
 from .utils.drawing import draw_player_point, draw_player_rect, draw_point
 from .utils.utils import get_player_point
+from .CenterNet import centernet
+import torch 
 
 
 class BaseModel:
-    def __init__(self, corners_model, persons_model=None) -> None:
+    def __init__(self, corners_model,game_objects_model) -> None:
         # corners coords in top view image
         self.est_points = {
             "1": (589, 48),
@@ -49,6 +51,18 @@ class BaseModel:
             "35": (563, 464),
             "36": (76, 162),
             "37": (76, 464),
+
+            "38": (506,51),
+            "39": (506,574),
+            "40": (131,51),
+            "41": (131,574),
+
+            "42": (364,51), 
+            "43": (364,574),
+            "44": (274,51),
+            "45": (274,574),
+
+
         }
 
         # top view image
@@ -58,30 +72,70 @@ class BaseModel:
         self.homo_history = []
         self.homo_history_mrg = []
 
+        # setting device
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
         # loading models
+        # self.all_objects_model = all_objects_model
         self.corners_model = corners_model
-        self.persons_model = persons_model
+        self.game_objects_model = game_objects_model
+        self.ball_model = centernet()
+        self.ball_model.load_state_dict(torch.load('models/soccer.pth'))
+        self.ball_model.to(self.device)
+        self.ball_model.eval()
+
 
         # initialize colors for teams 'will change after clustering the teams'
         self.colors = {"team1": (255, 0, 0), "team2": (0, 255, 0)}
 
         # cluster model
-        self.kmeans = KMeans(n_clusters=2, random_state=0)
+        self.cluster_model = KMeans(n_clusters=2, random_state=0)
         self.clustered = False
 
         # params for savgol filter that used in smoothing
         self.window_size = 15
         self.poly_order = 1
 
+
+        self.official_width = 109.728 #in meter
+        self.official_height = 73.152 #in meter
+
+        self.width_percentage = self.official_width/(self.est_points['1'][0]-self.est_points['23'][0])
+        self.height_percentage = self.official_height/(self.est_points['1'][1]-self.est_points['28'][1])
+
     def detect_pitch_corners(self, img, conf=0.15):
         """Detects corners of the pitch"""
         return detect_corners(img, self.corners_model, conf=conf)
-
-    def detect_players(self, img, conf=0.5):
+    
+    def detect_game_objects(self, img, conf=0.5):
         """Detects players in the pitch"""
-        return detect_persons(img, self.persons_model, conf=conf)
+        return detect_game_objects(img, self.game_objects_model, conf=conf)
 
-    def get_top_view(self, img, corners, thresh=80):
+    def detect_ball(self,img,last_loc):
+        """Detects ball in the pitch"""
+        return detect_ball(img,self.ball_model,last_loc)
+
+    # def detect_all_game_objects(self, img, conf=0.5):
+    #     """Detects players in the pitch"""
+    #     return detect_all_game_objects(img, self.all_objects_model, conf=conf)
+    
+    def warp_top_view(self,img,H):
+        top_view = cv2.warpPerspective(
+                    img, H, (self.est.shape[1], self.est.shape[0])
+                )
+        top_view = cv2.addWeighted(self.est, 0.8, top_view, 1, 1)
+        return top_view
+    
+    def warp_merge_view(self,img,H):
+        merge_view = cv2.warpPerspective(
+                    self.est, H, (img.shape[1], img.shape[0])
+                )
+        merge_view = cv2.addWeighted(img, 1, merge_view, 0.5, 1)
+        return merge_view
+
+
+
+    def get_top_view_homography(self, corners, thresh=80):
         """Returns top-down view of the field"""
         if len(corners) >= 4:
             pts1 = []
@@ -96,22 +150,10 @@ class BaseModel:
                 m = np.linalg.inv(m1)
             except:
                 m = calculate_homography(np.float32(pts1), np.float32(pts2), thresh)
+            return m
+        return np.full((3, 3), None)
 
-            try:
-                top_view = cv2.warpPerspective(
-                    img, m, (self.est.shape[1], self.est.shape[0])
-                )
-                top_view = cv2.addWeighted(self.est, 0.8, top_view, 1, 1)
-            except:
-                self.homo_history.append(np.full((3, 3), None))
-                self.homo_history_mrg.append(np.full((3, 3), None))
-                return self.est, self.est, np.full((3, 3), None)
-
-            return top_view, m
-
-        return self.est, np.full((3, 3), None)
-
-    def get_merge_view(self, img, corners, thresh=80):
+    def get_merge_view_homography(self, corners, thresh=80):
         """return the prespective 2d field merged with the original image"""
         if len(corners) >= 4:
             pts1 = []
@@ -122,18 +164,8 @@ class BaseModel:
                 pts2.append(self.est_points[str(corner)])
 
             m = calculate_homography(np.float32(pts2), np.float32(pts1), thresh)
-
-            try:
-                mrg_view = cv2.warpPerspective(
-                    self.est, m, (img.shape[1], img.shape[0])
-                )
-                mrg_view = cv2.addWeighted(img, 1, mrg_view, 0.5, 1)
-            except:
-                self.homo_history.append(np.full((3, 3), None))
-                self.homo_history_mrg.append(np.full((3, 3), None))
-                return self.est, self.est, np.full((3, 3), None)
-
-            return mrg_view, m
+            return m
+        return np.full((3, 3), None)
 
     def draw_corners(self, frame, corners):
         """
