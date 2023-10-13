@@ -108,7 +108,7 @@ then we transform the view of the field into a top-down view and get the players
 ![output of test img](images/test_output.jpg)
 ![output of live video](images/test.gif)
 ![output of live video](images/all_together.gif)
-![output of live video](images/possession.mp4)
+![output of live video](images/possession.gif)
 
 
 
